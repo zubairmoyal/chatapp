@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Image, TouchableOpacity, Button } from 'react-native'
+import { View, Text, FlatList, Image, TouchableOpacity, Button, StyleSheet } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import NavigationService from '../navigation/NavigationService'
 import { MY_AUTH } from '../navigation/routes'
@@ -47,6 +47,8 @@ const data = [
 
 const Home = (props: Props) => {
 
+    const [resetMessage, setResetMessage] = useState('');
+
     const onHandle = async (item: any) => {
         const res = await AsyncStorage.getItem('obj');
         if (res) {
@@ -57,8 +59,16 @@ const Home = (props: Props) => {
         }
     }
 
-    const onReset = () => {
-        AsyncStorage.removeItem('obj');
+    const onReset = async () => {
+        try {
+            await AsyncStorage.removeItem('obj');
+            setResetMessage('Chat reset successfully!');
+            setTimeout(() => {
+                setResetMessage('');
+            }, 2000);
+        } catch (error) {
+            console.error('Error resetting chat:', error);
+        }
     }
 
 
@@ -67,31 +77,14 @@ const Home = (props: Props) => {
             <TouchableOpacity
                 onPress={() => onHandle(item)}
                 activeOpacity={0.9}
-                style={{
-                    marginHorizontal: 18,
-                    marginBottom: 20,
-                    height: 80,
-                    borderRadius: 10,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: '#fff',
-                    paddingHorizontal: 10
-                }}>
+                style={styles.mainContainer}>
+
                 <Image
                     style={{ width: 60, height: 60, borderRadius: 30 }}
                     source={{ uri: item?.image }} />
-                <View style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginLeft: 15
-                }}>
-                    <Text style={{
-                        fontSize: 20,
-                        fontWeight: 'bold',
-                        letterSpacing: 2,
-                        color: '#000000'
-                    }}>{item?.name}</Text>
+
+                <View style={styles.secound}>
+                    <Text style={styles.txt}>{item?.name}</Text>
 
                 </View>
 
@@ -107,18 +100,14 @@ const Home = (props: Props) => {
             <FlatList
                 data={data}
                 renderItem={renderItem} />
-
+            {resetMessage !== '' && (
+                <View style={styles.resetMessageContainer}>
+                    <Text style={styles.resetMessageText}>{resetMessage}</Text>
+                </View>
+            )}
             <TouchableOpacity
-            activeOpacity={0.5}
-                style={{
-                    marginHorizontal: 18,
-                    marginBottom: 20,
-                    padding: 12,
-                    borderRadius: 10,
-                    alignItems: "center",
-                    justifyContent: 'center',
-                    backgroundColor: '#750000',
-                }}
+                activeOpacity={0.5}
+                style={styles.resetButton}
                 onPress={onReset}>
                 <Text style={{
                     fontSize: 20,
@@ -132,6 +121,54 @@ const Home = (props: Props) => {
 
         </View>
     )
-}
+};
+
+const styles = StyleSheet.create({
+    mainContainer: {
+        marginHorizontal: 18,
+        marginBottom: 20,
+        height: 80,
+        borderRadius: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: '#fff',
+        paddingHorizontal: 10
+    },
+    secound: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 15
+    },
+    txt: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        letterSpacing: 2,
+        color: '#000000'
+    },
+    resetButton: {
+        marginHorizontal: 18,
+        marginBottom: 20,
+        padding: 12,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: 'center',
+        backgroundColor: '#750000',
+    },
+    resetMessageContainer: {
+        marginBottom:15,
+        alignItems:'center',
+        justifyContent:'center',
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+      },
+      resetMessageText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#D33333',
+        letterSpacing:1.5
+      },
+})
 
 export default Home
